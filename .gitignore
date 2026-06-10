@@ -1,0 +1,10 @@
+
+# YuccaA build artifacts (features are applied into the tree at build time)
+/out/
+/.build_cache/
+/drivers/kernelsu
+*.rej
+*.orig
+/KernelSU/
+/Baseband-guard/
+/SukiSU_patch/
