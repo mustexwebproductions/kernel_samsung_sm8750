@@ -593,8 +593,7 @@ COMPAT_SYSCALL_DEFINE3(getdents, unsigned int, fd,
 		.count = count
 	};
 	int error;
-
-	#ifdef CONFIG_ZEROMOUNT
+#ifdef CONFIG_ZEROMOUNT
 	int initial_count = count;
 #endif
 
@@ -602,11 +601,18 @@ COMPAT_SYSCALL_DEFINE3(getdents, unsigned int, fd,
 	if (!f.file)
 		return -EBADF;
 
+#ifdef CONFIG_ZEROMOUNT
+	if (f.file->f_pos >= ZEROMOUNT_MAGIC_POS) {
+		error = 0;
+		goto skip_real_iterate;
+	}
+#endif
+
 	error = iterate_dir(f.file, &buf.ctx);
 	if (error >= 0)
 		error = buf.error;
 
-		#ifdef CONFIG_ZEROMOUNT
+#ifdef CONFIG_ZEROMOUNT
 skip_real_iterate:
 	if (error >= 0 && !signal_pending(current)) {
 		zeromount_inject_dents(f.file, (void __user **)&dirent, &count, &f.file->f_pos);
@@ -615,9 +621,9 @@ skip_real_iterate:
 		goto zm_out;
 	}
 #endif
-	
+
 	if (buf.prev_reclen) {
-		struct compat_linux_dirent __user * lastdirent;
+		struct compat_linux_dirent __user *lastdirent;
 		lastdirent = (void __user *)buf.current_dir - buf.prev_reclen;
 
 		if (put_user(buf.ctx.pos, &lastdirent->d_off))
@@ -625,10 +631,12 @@ skip_real_iterate:
 		else
 			error = count - buf.count;
 	}
-	#ifdef CONFIG_ZEROMOUNT
+
+#ifdef CONFIG_ZEROMOUNT
 zm_out:
 #endif
 	fdput_pos(f);
 	return error;
+}
 }
 #endif
