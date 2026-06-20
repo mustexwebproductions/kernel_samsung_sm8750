@@ -417,4 +417,11 @@ config FREEZABLE_IN_LOOKUP
 	  To prevent these situations, modify VFS to check if the underlying
 	  filesystem requires a freezable wait.
 
+config ZEROMOUNT
+	bool "ZeroMount Path Redirection Subsystem"
+	default y
+	help
+	  ZeroMount allows path redirection and virtual file injection
+	  without mounting filesystems. Useful for systemless modifications.
+
 endmenu
