@@ -203,9 +203,16 @@ getname_flags(const char __user *filename, int flags, int *empty)
 	}
 
 	result->uptr = filename;
-	result->aname = NULL;
-	audit_getname(result);
-	return result;
+result->aname = NULL;
+audit_getname(result);
+
+#ifdef CONFIG_ZEROMOUNT
+	if (!IS_ERR(result)) {
+		result = zeromount_getname_hook(result);
+	}
+#endif
+
+return result;
 }
 
 struct filename *
