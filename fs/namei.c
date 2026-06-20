@@ -410,7 +410,19 @@ static int acl_permission_check(struct mnt_idmap *idmap,
 int generic_permission(struct mnt_idmap *idmap, struct inode *inode,
 		       int mask)
 {
-	int ret;
+		int ret;
+
+#ifdef CONFIG_ZEROMOUNT
+	if (zeromount_is_injected_file(inode)) {
+		if (mask & MAY_WRITE)
+			return -EACCES;
+		return 0;
+	}
+
+	if (S_ISDIR(inode->i_mode) && zeromount_is_traversal_allowed(inode, mask)) {
+		return 0;
+	}
+#endif
 
 	/*
 	 * Do the basic permission checks.
