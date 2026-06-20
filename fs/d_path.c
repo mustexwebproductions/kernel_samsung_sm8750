@@ -8,6 +8,10 @@
 #include <linux/prefetch.h>
 #include "mount.h"
 #include "internal.h"
+#ifdef CONFIG_ZEROMOUNT
+#include <linux/zeromount.h>
+#endif
+
 
 struct prepend_buffer {
 	char *buf;
