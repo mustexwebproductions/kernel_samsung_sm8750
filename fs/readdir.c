@@ -314,7 +314,7 @@ SYSCALL_DEFINE3(getdents, unsigned int, fd,
 	struct getdents_callback buf = {
 		.ctx.actor = filldir,
 		.count = count,
-		.current_dir = dirent
+		
 	};
 	int error;
 
@@ -568,6 +568,10 @@ COMPAT_SYSCALL_DEFINE3(getdents, unsigned int, fd,
 		.count = count
 	};
 	int error;
+
+	#ifdef CONFIG_ZEROMOUNT
+	int initial_count = count;
+#endif
 
 	f = fdget_pos(fd);
 	if (!f.file)
