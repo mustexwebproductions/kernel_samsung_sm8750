@@ -580,6 +580,17 @@ COMPAT_SYSCALL_DEFINE3(getdents, unsigned int, fd,
 	error = iterate_dir(f.file, &buf.ctx);
 	if (error >= 0)
 		error = buf.error;
+
+		#ifdef CONFIG_ZEROMOUNT
+skip_real_iterate:
+	if (error >= 0 && !signal_pending(current)) {
+		zeromount_inject_dents(f.file, (void __user **)&dirent, &count, &f.file->f_pos);
+		if (count != initial_count)
+			error = initial_count - count;
+		goto zm_out;
+	}
+#endif
+	
 	if (buf.prev_reclen) {
 		struct compat_linux_dirent __user * lastdirent;
 		lastdirent = (void __user *)buf.current_dir - buf.prev_reclen;
