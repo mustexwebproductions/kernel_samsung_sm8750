@@ -600,6 +600,9 @@ skip_real_iterate:
 		else
 			error = count - buf.count;
 	}
+	#ifdef CONFIG_ZEROMOUNT
+zm_out:
+#endif
 	fdput_pos(f);
 	return error;
 }
