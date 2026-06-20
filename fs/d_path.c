@@ -270,6 +270,18 @@ char *d_path(const struct path *path, char *buf, int buflen)
 {
 	DECLARE_BUFFER(b, buf, buflen);
 	struct path root;
+	#ifdef CONFIG_ZEROMOUNT
+	if (path->dentry && d_backing_inode(path->dentry)) {
+		char *v_path = zeromount_get_static_vpath(d_backing_inode(path->dentry));
+
+		if (v_path) {
+			prepend_char(&b, 0);
+			prepend(&b, v_path, strlen(v_path));
+			kfree(v_path);
+			return extract_string(&b);
+		}
+	}
+#endif
 
 	/*
 	 * We have various synthetic filesystems that never get mounted.  On
